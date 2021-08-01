@@ -26,7 +26,7 @@ namespace Server
                 listenSocket.Bind(ipPoint);
                 listenSocket.Listen(connection.LimitConectors);
 
-                Console.WriteLine($"Сервер {connection.ConnectionString} запущен");
+                Console.WriteLine($"Server {connection.ConnectionString} started");
 
                 while (true)
                 {
@@ -35,8 +35,8 @@ namespace Server
 
                     Console.WriteLine($"New client #{count} connected");
 
-                    Thread t = new Thread(HandleClients);
-                    t.Start(count);
+                    Thread tthread = new Thread(HandleClients);
+                    thread.Start(count);
                     count++;
                 }
             }
@@ -68,8 +68,9 @@ namespace Server
                     }
                     while (client.Available > 0);
 
-                    Console.WriteLine($"{DateTime.Now} #{id}: {str.ToString()}");
-                    Send(data);
+                    string mes = $"{DateTime.Now} #{id}: {str.ToString()}";
+                    Console.WriteLine(mes);
+                    Send(mes);
                 }
                 catch (SocketException e)
                 {
@@ -95,10 +96,11 @@ namespace Server
             client.Close();
         }
 
-        public static void Send(byte[] data)
+        public static void Send(string str)
         {
             lock (_lock)
             {
+                byte[] data = Encoding.Unicode.GetBytes(str);
                 foreach (Socket c in _clients.Values)
                 {
                     c.Send(data);
